@@ -105,6 +105,8 @@ var UI = {
             borderSize: 0.1 * SCALE,
             backgroundColor: "#92b872",
             backgroundColorSelected: "#b7d695",
+            textOffsetX: SCALE,
+            textOffsetY: SCALE * 1.5,
         },
     },
     field: {
@@ -124,6 +126,7 @@ var plantTypes = [Sunflower, PeaShooter];
 var selectedPlant = Sunflower;
 function setup() {
     console.log("started v1");
+    Main.settings();
     Main.newField();
 }
 var xx = 0;
@@ -132,10 +135,6 @@ function draw() {
     Main.drawPlantBar();
     Main.drawField();
     Main.drawStatusBar();
-    xx++;
-    translate(0, -4 * SCALE);
-    fill("#0099ff");
-    rect(xx, 0, SCALE, SCALE);
 }
 function mouseClicked() {
     var x = mouseX;
@@ -167,6 +166,9 @@ function mouseClicked() {
 var Main = (function () {
     function Main() {
     }
+    Main.settings = function () {
+        textFont("Bradley Hand");
+    };
     Main.newField = function () {
         for (var x = 0; x < sizeX; x++) {
             grid[x] = [];
@@ -190,9 +192,13 @@ var Main = (function () {
             var pt = plantTypes[i];
             var p = new pt(null);
             p.draw(i * UI.plantBar.card.sizeX, 0, 2);
+            textAlign(CENTER, TOP);
+            textSize(SCALE * 0.5);
+            fill("#fff");
+            stroke("#000");
+            strokeWeight(SCALE * 0.05);
+            text("$ " + p.cost, i * UI.plantBar.card.sizeX + UI.plantBar.card.textOffsetX, UI.plantBar.card.textOffsetY);
         }
-        fill("#ffffff");
-        text("$ " + game.money, SCALE * 0.25, (sizeY + 0.5) * SCALE);
         translate(0, UI.plantBar.sizeY);
     };
     Main.drawField = function () {

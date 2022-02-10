@@ -25,6 +25,8 @@ const UI = {
       borderSize: 0.1 * SCALE,
       backgroundColor: "#92b872",
       backgroundColorSelected: "#b7d695",
+      textOffsetX: SCALE,
+      textOffsetY: SCALE * 1.5,
     },
   },
   field: {
@@ -46,6 +48,7 @@ let selectedPlant: (new (cell: Cell) => Plant) = Sunflower;
 
 function setup() {
   console.log("started v1");
+  Main.settings();
   Main.newField();
 }
 
@@ -57,11 +60,6 @@ function draw() {
   Main.drawPlantBar();
   Main.drawField();
   Main.drawStatusBar();
-
-  xx++
-  translate(0, -4 * SCALE);
-  fill("#0099ff");
-  rect(xx, 0, SCALE, SCALE);
 }
 
 function mouseClicked() {
@@ -102,6 +100,9 @@ function mouseClicked() {
 }
 
 class Main {
+  static settings() {
+    textFont("Bradley Hand");
+  }
 
   static newField() {
     for (let x = 0; x < sizeX; x++) {
@@ -131,11 +132,14 @@ class Main {
       let p = new pt(null);
 
       p.draw(i * UI.plantBar.card.sizeX, 0, 2);
+
+      textAlign(CENTER, TOP);
+      textSize(SCALE * 0.5);
+      fill("#fff");
+      stroke("#000");
+      strokeWeight(SCALE * 0.05);
+      text(`$ ${p.cost}`, i * UI.plantBar.card.sizeX + UI.plantBar.card.textOffsetX, UI.plantBar.card.textOffsetY);
     }
-
-    fill("#ffffff");
-    text("$ " + game.money, SCALE * 0.25, (sizeY + 0.5) * SCALE);
-
     translate(0, UI.plantBar.sizeY);
   }
 
