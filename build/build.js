@@ -35,7 +35,7 @@ var Sunflower = (function (_super) {
     }
     Sunflower.prototype.action = function () {
         var _this = this;
-        game.money += 25;
+        objects.suns.push(new Sun(this.cell.x * SCALE, this.cell.y * SCALE));
         this.timeout = setTimeout(function () {
             _this.action();
         }, 24000);
@@ -90,6 +90,9 @@ var game = {
     SCALE: 80,
     grid: [],
     money: 600,
+};
+var objects = {
+    suns: [],
 };
 var sizeX = game.sizeX, sizeY = game.sizeY, SCALE = game.SCALE, grid = game.grid;
 var UI = {
@@ -152,6 +155,13 @@ function mouseClicked() {
     }
     y -= UI.plantBar.sizeY;
     if (y < UI.field.sizeY) {
+        for (var _i = 0, _a = objects.suns; _i < _a.length; _i++) {
+            var sun = _a[_i];
+            if (x > sun.x && x < sun.x + SCALE && y > sun.y && y < sun.y + SCALE) {
+                sun.action();
+                return;
+            }
+        }
         x = floor(x / SCALE);
         y = floor(y / SCALE);
         game.grid[x][y].build(selectedPlant);
@@ -204,6 +214,7 @@ var Main = (function () {
     Main.drawField = function () {
         Main.drawBackground();
         Main.drawTurrets();
+        Main.drawSuns();
         translate(0, UI.field.sizeY);
     };
     Main.drawBackground = function () {
@@ -226,6 +237,12 @@ var Main = (function () {
             for (var y = 0; y < sizeY; y++) {
                 (_a = game.grid[x][y].plant) === null || _a === void 0 ? void 0 : _a.draw();
             }
+        }
+    };
+    Main.drawSuns = function () {
+        for (var _i = 0, _a = objects.suns; _i < _a.length; _i++) {
+            var sun = _a[_i];
+            sun.draw();
         }
     };
     Main.drawStatusBar = function () {
@@ -259,5 +276,51 @@ var Game = (function () {
     function Game() {
     }
     return Game;
+}());
+var Sun = (function () {
+    function Sun(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    Sun.prototype.draw = function (_x, _y, _size) {
+        var size = _size !== null && _size !== void 0 ? _size : 1;
+        var x = _x !== null && _x !== void 0 ? _x : this.x;
+        var y = _y !== null && _y !== void 0 ? _y : this.y;
+        x += SCALE * 0.5 * size;
+        y += SCALE * 0.5 * size;
+        fill("#ffff00");
+        stroke("#ffcc00");
+        strokeWeight(SCALE * 0.1 * size);
+        circle(x, y, SCALE * 0.7 * size);
+    };
+    Sun.prototype.action = function () {
+        var _this = this;
+        game.money += 25;
+        objects.suns.forEach(function (s, i, a) {
+            if (s == _this)
+                a.splice(i, 1);
+        });
+    };
+    return Sun;
+}());
+var Pea = (function () {
+    function Pea(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    Pea.prototype.draw = function (_x, _y, _size) {
+        var size = _size !== null && _size !== void 0 ? _size : 1;
+        var x = _x !== null && _x !== void 0 ? _x : this.x;
+        var y = _y !== null && _y !== void 0 ? _y : this.y;
+        x += SCALE * 0.5 * size;
+        y += SCALE * 0.5 * size;
+        fill("#ffff00");
+        stroke("#ffcc00");
+        strokeWeight(SCALE * 0.05 * size);
+        circle(x, y, SCALE * 0.35 * size);
+    };
+    Pea.prototype.action = function () {
+    };
+    return Pea;
 }());
 //# sourceMappingURL=build.js.map

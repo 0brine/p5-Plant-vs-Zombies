@@ -17,7 +17,7 @@ class Sunflower extends Plant {
 
   action() {
     // spawn sun
-    game.money += 25;
+    objects.suns.push(new Sun(this.cell.x * SCALE, this.cell.y * SCALE));
 
     // call this method agin after 24 seconds
     this.timeout = setTimeout(() => {

@@ -10,6 +10,10 @@ const game = {
   money: 600,
 }
 
+const objects = {
+  suns: [] as Sun[],
+}
+
 const { sizeX, sizeY, SCALE, grid } = game;
 
 const UI = {
@@ -84,6 +88,15 @@ function mouseClicked() {
 
   // is mouse over field
   if (y < UI.field.sizeY) {
+    //mouse over sun
+    for (const sun of objects.suns) {
+      if (x > sun.x && x < sun.x + SCALE && y > sun.y && y < sun.y + SCALE) {
+        sun.action();
+        return;
+      }
+    }
+
+
     x = floor(x / SCALE);
     y = floor(y / SCALE);
 
@@ -146,6 +159,7 @@ class Main {
   static drawField() {
     Main.drawBackground();
     Main.drawTurrets();
+    Main.drawSuns();
 
     translate(0, UI.field.sizeY);
   }
@@ -169,6 +183,12 @@ class Main {
       for (let y = 0; y < sizeY; y++) {
         game.grid[x][y].plant?.draw();
       }
+    }
+  }
+
+  static drawSuns() {
+    for (const sun of objects.suns) {
+      sun.draw();
     }
   }
 
