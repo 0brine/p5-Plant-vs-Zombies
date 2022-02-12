@@ -1,6 +1,7 @@
 /// <reference path="aProjectile.ts"/>
 
 class Pea extends Projectile {
+  hitSound = sounds.splat;
   dmg = 10;
 
   constructor(x: number, y: number) {
@@ -16,8 +17,8 @@ class Pea extends Projectile {
     x += SCALE * 0.5 * size;
     y += SCALE * 0.5 * size;
 
-    fill("#ffff00");
-    stroke("#ffcc00");
+    fill("#99ff00");
+    stroke("#77dd00");
     strokeWeight(SCALE * 0.05 * size);
     circle(x, y, SCALE * 0.35 * size);
   }

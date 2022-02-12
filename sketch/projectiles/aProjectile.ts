@@ -2,6 +2,7 @@ abstract class Projectile {
   x: number;
   y: number;
   abstract dmg: number;
+  abstract hitSound: SoundHelper;
   speed = 5;
 
   constructor(x: number, y: number) {
@@ -26,6 +27,7 @@ abstract class Projectile {
 
   action(zombie: Zombie) {
     zombie.getDmg(this);
+    this.hitSound.play();
     this.destroy();
   }
 

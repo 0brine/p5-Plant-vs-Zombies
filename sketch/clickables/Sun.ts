@@ -1,6 +1,8 @@
 /// <reference path="aClickables.ts"/>
 
 class Sun extends Clickables {
+  collectingSound = sounds.collectSun;
+
   constructor(x: number, y: number) {
     super(x, y);
   }
@@ -20,8 +22,7 @@ class Sun extends Clickables {
     circle(x, y, SCALE * 0.3 * size);
   }
 
-  action() {
+  customAction() {
     game.money += 25;
-    this.destroy();
   }
 }

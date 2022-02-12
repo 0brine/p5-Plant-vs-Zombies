@@ -6,11 +6,16 @@ abstract class Plant {
   abstract fireRate: number;
   abstract countdown: number;
 
+  abstract actionSound: SoundHelper;
+
   constructor(cell?: Cell) {
     this.cell = cell;
   }
 
-  protected abstract action(): void;
+  protected action() {
+    objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
+    this.actionSound.play();
+  }
 
   update() {
     if (this.isZombieInfront()) {

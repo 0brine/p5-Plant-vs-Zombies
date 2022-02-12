@@ -5,12 +5,19 @@ abstract class Clickables {
   despawnTimer = 10;
   size = 1;
 
+  abstract collectingSound: SoundHelper;
+
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
   }
 
-  abstract action(): void;
+  action() {
+    this.customAction();
+    this.collectingSound.play();
+    this.destroy();
+  }
+  protected abstract customAction(): void;
 
   update() {
     this.despawnTimer -= deltaTime;

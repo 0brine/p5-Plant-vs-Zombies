@@ -20,6 +20,7 @@ class Cell {
     const plantInstance = new plant(null);
 
     if (plantInstance.cost <= game.money) {
+      sounds.planted.play();
       this.plant = new plant(this);
       game.money -= plantInstance.cost;
     }

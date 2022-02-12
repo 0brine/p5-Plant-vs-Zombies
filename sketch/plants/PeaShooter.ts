@@ -1,6 +1,7 @@
 /// <reference path="aPlant.ts"/>
 
 class PeaShooter extends Plant {
+  actionSound = sounds.throw;
   readonly cost = 100;
   readonly projectile: (new (x: number, y: number) => Projectile) = Pea;
   health = 4;
@@ -10,10 +11,6 @@ class PeaShooter extends Plant {
   constructor(cell: Cell) {
     super(cell);
     if (cell == null) return;
-  }
-
-  action() {
-    objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
   }
 
   draw(_x?: number, _y?: number, _size?: number) {

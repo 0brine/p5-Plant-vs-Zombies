@@ -2,6 +2,10 @@ var Plant = (function () {
     function Plant(cell) {
         this.cell = cell;
     }
+    Plant.prototype.action = function () {
+        objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
+        this.actionSound.play();
+    };
     Plant.prototype.update = function () {
         if (this.isZombieInfront()) {
             if (this.countdown <= 0) {
@@ -50,6 +54,7 @@ var Sunflower = (function (_super) {
     __extends(Sunflower, _super);
     function Sunflower(cell) {
         var _this = _super.call(this, cell) || this;
+        _this.actionSound = new SoundHelper();
         _this.fireRate = 24;
         _this.countdown = 7;
         _this.cost = 50;
@@ -59,6 +64,7 @@ var Sunflower = (function (_super) {
             return _this;
         return _this;
     }
+    ;
     Sunflower.prototype.update = function () {
         if (this.countdown <= 0) {
             this.action();
@@ -67,7 +73,7 @@ var Sunflower = (function (_super) {
         this.countdown -= deltaTime;
     };
     Sunflower.prototype.action = function () {
-        objects.clickables.push(new Sun(this.cell.x * SCALE, this.cell.y * SCALE));
+        objects.clickables.push(new Sun(this.cell.x * SCALE + random(SCALE * 0.25), this.cell.y * SCALE + random(SCALE * 0.25)));
     };
     Sunflower.prototype.draw = function (_x, _y, _size) {
         var size = _size !== null && _size !== void 0 ? _size : 1;
@@ -86,6 +92,7 @@ var PeaShooter = (function (_super) {
     __extends(PeaShooter, _super);
     function PeaShooter(cell) {
         var _this = _super.call(this, cell) || this;
+        _this.actionSound = sounds.throw;
         _this.cost = 100;
         _this.projectile = Pea;
         _this.health = 4;
@@ -95,9 +102,6 @@ var PeaShooter = (function (_super) {
             return _this;
         return _this;
     }
-    PeaShooter.prototype.action = function () {
-        objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
-    };
     PeaShooter.prototype.draw = function (_x, _y, _size) {
         var size = _size !== null && _size !== void 0 ? _size : 1;
         var x = _x !== null && _x !== void 0 ? _x : this.cell.x * SCALE + (1 - size) * SCALE * 0.5;
@@ -111,6 +115,25 @@ var PeaShooter = (function (_super) {
     };
     return PeaShooter;
 }(Plant));
+var SoundHelper = (function () {
+    function SoundHelper() {
+        var path = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            path[_i] = arguments[_i];
+        }
+        this.sounds = [];
+        for (var _a = 0, path_1 = path; _a < path_1.length; _a++) {
+            var p = path_1[_a];
+            this.sounds.push(new p5.SoundFile(p));
+        }
+    }
+    SoundHelper.prototype.play = function () {
+        if (this.sounds.length <= 0)
+            return;
+        this.sounds[Math.floor(random(this.sounds.length))].play();
+    };
+    return SoundHelper;
+}());
 document.addEventListener('contextmenu', function (event) { return event.preventDefault(); });
 var game = {
     sizeX: 9,
@@ -156,8 +179,16 @@ var UI = {
         textSize: 0.5 * SCALE,
     },
 };
+var sounds = {
+    collectSun: new SoundHelper("assets/CollectSun.ogg"),
+    planted: new SoundHelper("assets/Planted.ogg"),
+    splat: new SoundHelper("assets/Splat.ogg", "assets/Splat2.ogg", "assets/Splat3.ogg"),
+    throw: new SoundHelper("assets/Throw.ogg", "assets/Throw2.ogg"),
+};
 var plantTypes = [Sunflower, PeaShooter];
 var selectedPlant = Sunflower;
+function preload() {
+}
 function setup() {
     console.log("started v1");
     Main.settings();
@@ -351,6 +382,7 @@ var Cell = (function () {
         }
         var plantInstance = new plant(null);
         if (plantInstance.cost <= game.money) {
+            sounds.planted.play();
             this.plant = new plant(this);
             game.money -= plantInstance.cost;
         }
@@ -369,6 +401,11 @@ var Clickables = (function () {
         this.x = x;
         this.y = y;
     }
+    Clickables.prototype.action = function () {
+        this.customAction();
+        this.collectingSound.play();
+        this.destroy();
+    };
     Clickables.prototype.update = function () {
         this.despawnTimer -= deltaTime;
         if (this.despawnTimer <= 0) {
@@ -388,7 +425,9 @@ var Clickables = (function () {
 var Sun = (function (_super) {
     __extends(Sun, _super);
     function Sun(x, y) {
-        return _super.call(this, x, y) || this;
+        var _this = _super.call(this, x, y) || this;
+        _this.collectingSound = sounds.collectSun;
+        return _this;
     }
     Sun.prototype.draw = function (_x, _y, _size) {
         var size = _size !== null && _size !== void 0 ? _size : this.size;
@@ -401,9 +440,8 @@ var Sun = (function (_super) {
         strokeWeight(SCALE * 0.2 * size);
         circle(x, y, SCALE * 0.3 * size);
     };
-    Sun.prototype.action = function () {
+    Sun.prototype.customAction = function () {
         game.money += 25;
-        this.destroy();
     };
     return Sun;
 }(Clickables));
@@ -427,6 +465,7 @@ var Projectile = (function () {
     };
     Projectile.prototype.action = function (zombie) {
         zombie.getDmg(this);
+        this.hitSound.play();
         this.destroy();
     };
     Projectile.prototype.destroy = function () {
@@ -442,6 +481,7 @@ var Pea = (function (_super) {
     __extends(Pea, _super);
     function Pea(x, y) {
         var _this = _super.call(this, x, y) || this;
+        _this.hitSound = sounds.splat;
         _this.dmg = 10;
         return _this;
     }
@@ -451,8 +491,8 @@ var Pea = (function (_super) {
         var y = _y !== null && _y !== void 0 ? _y : this.y;
         x += SCALE * 0.5 * size;
         y += SCALE * 0.5 * size;
-        fill("#ffff00");
-        stroke("#ffcc00");
+        fill("#99ff00");
+        stroke("#77dd00");
         strokeWeight(SCALE * 0.05 * size);
         circle(x, y, SCALE * 0.35 * size);
     };

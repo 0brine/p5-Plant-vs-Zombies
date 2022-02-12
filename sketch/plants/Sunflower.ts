@@ -1,6 +1,7 @@
 /// <reference path="aPlant.ts"/>
 
 class Sunflower extends Plant {
+  actionSound = new SoundHelper();;
   fireRate = 24;
   countdown = 7;
   readonly cost = 50;
@@ -23,7 +24,7 @@ class Sunflower extends Plant {
 
   action() {
     // spawn sun
-    objects.clickables.push(new Sun(this.cell.x * SCALE, this.cell.y * SCALE));
+    objects.clickables.push(new Sun(this.cell.x * SCALE + random(SCALE * 0.25), this.cell.y * SCALE + random(SCALE * 0.25)));
   }
 
   draw(_x?: number, _y?: number, _size?: number) {

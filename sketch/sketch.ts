@@ -1,5 +1,6 @@
 /// <reference path="plants/Sunflower.ts"/>
 /// <reference path="plants/PeaShooter.ts"/>
+/// <reference path="SoundHelper.ts"/>
 
 document.addEventListener('contextmenu', event => event.preventDefault());
 
@@ -51,8 +52,18 @@ const UI = {
   },
 }
 
+const sounds = {
+  collectSun: new SoundHelper("assets/CollectSun.ogg"),
+  planted: new SoundHelper("assets/Planted.ogg"),
+  splat: new SoundHelper("assets/Splat.ogg", "assets/Splat2.ogg", "assets/Splat3.ogg"),
+  throw: new SoundHelper("assets/Throw.ogg", "assets/Throw2.ogg"),
+}
+
 const plantTypes: (new (cell: Cell) => Plant)[] = [Sunflower, PeaShooter];
 let selectedPlant: (new (cell: Cell) => Plant) = Sunflower;
+
+function preload() {
+}
 
 function setup() {
   console.log("started v1");
