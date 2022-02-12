@@ -1,5 +1,6 @@
 /// <reference path="plants/Sunflower.ts"/>
 /// <reference path="plants/PeaShooter.ts"/>
+
 document.addEventListener('contextmenu', event => event.preventDefault());
 
 const game = {
@@ -8,10 +9,13 @@ const game = {
   SCALE: 80,
   grid: [] as Cell[][],
   money: 600,
+  oldTime: new Date().getTime(),
 }
 
 const objects = {
-  suns: [] as Sun[],
+  clickables: [] as Clickables[],
+  projectiles: [] as Projectile[],
+  zombies: [] as Zombie[],
 }
 
 const { sizeX, sizeY, SCALE, grid } = game;
@@ -52,13 +56,17 @@ let selectedPlant: (new (cell: Cell) => Plant) = Sunflower;
 
 function setup() {
   console.log("started v1");
+
   Main.settings();
   Main.newField();
+
+  objects.zombies.push(new NormalZombie());
 }
 
 let xx = 0;
 
 function draw() {
+  deltaTime /= 1000;
   background(UI.general.backgroundColor);
 
   Main.drawPlantBar();
@@ -88,19 +96,18 @@ function mouseClicked() {
 
   // is mouse over field
   if (y < UI.field.sizeY) {
-    //mouse over sun
-    for (const sun of objects.suns) {
-      if (x > sun.x && x < sun.x + SCALE && y > sun.y && y < sun.y + SCALE) {
-        sun.action();
+    //mouse over clickable
+    for (const clickable of objects.clickables) {
+      if (x > clickable.x && x < clickable.x + SCALE * clickable.size && y > clickable.y && y < clickable.y + SCALE * clickable.size) {
+        clickable.action();
         return;
       }
     }
 
-
     x = floor(x / SCALE);
     y = floor(y / SCALE);
 
-    game.grid[x][y].build(selectedPlant);
+    game.grid[y][x].build(selectedPlant);
     return;
   }
   y -= UI.field.sizeY;
@@ -118,10 +125,10 @@ class Main {
   }
 
   static newField() {
-    for (let x = 0; x < sizeX; x++) {
-      grid[x] = [];
-      for (let y = 0; y < sizeY; y++) {
-        grid[x][y] = new Cell(x, y);
+    for (let y = 0; y < sizeY; y++) {
+      grid[y] = [];
+      for (let x = 0; x < sizeX; x++) {
+        grid[y][x] = new Cell(x, y);
       }
     }
 
@@ -157,11 +164,46 @@ class Main {
   }
 
   static drawField() {
+    Main.updatePlants();
+    Main.updateObjects();
+
     Main.drawBackground();
-    Main.drawTurrets();
-    Main.drawSuns();
+
+    Main.drawPlants();
+    Main.drawObjects();
 
     translate(0, UI.field.sizeY);
+  }
+  static updatePlants() {
+    for (const column of grid) {
+      for (const cell of column) {
+        cell.plant?.update();
+      }
+    }
+  }
+
+  static updateObjects() {
+    Main.updateClickables();
+    Main.updateProjectiles();
+    Main.updateZombies();
+  }
+
+  static updateClickables() {
+    for (const clickable of objects.clickables) {
+      clickable.update();
+    }
+  }
+
+  static updateZombies() {
+    for (const zombie of objects.zombies) {
+      zombie.update();
+    }
+  }
+
+  static updateProjectiles() {
+    for (const projectile of objects.projectiles) {
+      projectile.update();
+    }
   }
 
   static drawBackground() {
@@ -178,17 +220,35 @@ class Main {
     }
   }
 
-  static drawTurrets() {
+  static drawPlants() {
     for (let x = 0; x < sizeX; x++) {
       for (let y = 0; y < sizeY; y++) {
-        game.grid[x][y].plant?.draw();
+        game.grid[y][x].plant?.draw();
       }
     }
   }
 
-  static drawSuns() {
-    for (const sun of objects.suns) {
-      sun.draw();
+  static drawObjects() {
+    Main.drawZombies();
+    Main.drawProjectiles();
+    Main.drawClickables();
+  }
+
+  static drawZombies() {
+    for (const zombie of objects.zombies) {
+      zombie.draw();
+    }
+  }
+
+  static drawProjectiles() {
+    for (const projectile of objects.projectiles) {
+      projectile.draw();
+    }
+  }
+
+  static drawClickables() {
+    for (const clickable of objects.clickables) {
+      clickable.draw();
     }
   }
 

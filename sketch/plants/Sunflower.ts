@@ -1,28 +1,29 @@
-/// <reference path="Plant.ts"/>
+/// <reference path="aPlant.ts"/>
 
 class Sunflower extends Plant {
-  readonly dmg = 0;
+  fireRate = 24;
+  countdown = 7;
   readonly cost = 50;
-  timeout: number;
+  readonly projectile: (new (x: number, y: number) => Projectile) = null;
+  health = 4;
 
   constructor(cell: Cell) {
     super(cell);
     if (cell == null) return;
+  }
 
-    // spawn sun 7s after creation
-    this.timeout = setTimeout(() => {
+  update() {
+    if (this.countdown <= 0) {
       this.action();
-    }, random(7000, 7000));
+      this.countdown += this.fireRate;
+    }
+
+    this.countdown -= deltaTime;
   }
 
   action() {
     // spawn sun
-    objects.suns.push(new Sun(this.cell.x * SCALE, this.cell.y * SCALE));
-
-    // call this method agin after 24 seconds
-    this.timeout = setTimeout(() => {
-      this.action();
-    }, 24000);
+    objects.clickables.push(new Sun(this.cell.x * SCALE, this.cell.y * SCALE));
   }
 
   draw(_x?: number, _y?: number, _size?: number) {
@@ -38,9 +39,5 @@ class Sunflower extends Plant {
     stroke("#ffcc00");
     strokeWeight(SCALE * 0.1 * size);
     circle(x, y, SCALE * 0.7 * size);
-  }
-
-  destroy() {
-    clearTimeout(this.timeout);
   }
 }

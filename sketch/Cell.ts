@@ -1,4 +1,4 @@
-/// <reference path="plants/Plant.ts"/>
+/// <reference path="plants/aPlant.ts"/>
 /// <reference path="sketch.ts"/>
 
 class Cell {

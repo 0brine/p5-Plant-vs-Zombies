@@ -1,8 +1,11 @@
-/// <reference path="Plant.ts"/>
+/// <reference path="aPlant.ts"/>
 
 class PeaShooter extends Plant {
-  readonly dmg = 20;
   readonly cost = 100;
+  readonly projectile: (new (x: number, y: number) => Projectile) = Pea;
+  health = 4;
+  fireRate = 1.5;
+  countdown = 0;
 
   constructor(cell: Cell) {
     super(cell);
@@ -10,6 +13,7 @@ class PeaShooter extends Plant {
   }
 
   action() {
+    objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
   }
 
   draw(_x?: number, _y?: number, _size?: number) {
@@ -25,8 +29,5 @@ class PeaShooter extends Plant {
     stroke("#99ff00");
     strokeWeight(SCALE * 0.1 * size);
     circle(x, y, SCALE * 0.7 * size);
-  }
-
-  destroy() {
   }
 }
