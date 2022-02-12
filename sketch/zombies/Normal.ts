@@ -1,7 +1,7 @@
 /// <reference path="aZombie.ts"/>
 
 class NormalZombie extends Zombie {
-  hp = 100;
+  hp = 200;
 
   draw(_x?: number, _y?: number, _size?: number): void {
     let size = _size ?? 1;

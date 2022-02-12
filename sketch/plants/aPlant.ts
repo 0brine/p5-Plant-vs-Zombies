@@ -1,7 +1,7 @@
 abstract class Plant {
   readonly abstract cost: number;
   readonly abstract projectile: (new (x: number, y: number) => Projectile);
-  abstract health: number;
+  health = 300;
 
   abstract fireRate: number;
   abstract countdown: number;

@@ -17,9 +17,9 @@ abstract class Projectile {
       this.destroy();
     }
 
-    let z: Zombie;
-    if (z = objects.zombies.filter((z) => z.y === this.y && z.x < this.x + SCALE * this.speed / 10)?.[0]) {
-      this.action(z);
+    let zombie: Zombie;
+    if (zombie = objects.zombies.filter((z) => z.y === this.y && z.x > this.x && z.x < this.x + SCALE * this.speed / 10)?.[0]) {
+      this.action(zombie);
     }
   }
 

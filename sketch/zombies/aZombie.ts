@@ -1,7 +1,7 @@
 abstract class Zombie {
   x: number;
   lane: number;
-  dmg = 1;
+  dmg = 100;
   speed = -0.25;
   abstract hp: number;
 

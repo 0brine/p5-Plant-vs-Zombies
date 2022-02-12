@@ -4,7 +4,6 @@ class PeaShooter extends Plant {
   actionSound = sounds.throw;
   readonly cost = 100;
   readonly projectile: (new (x: number, y: number) => Projectile) = Pea;
-  health = 4;
   fireRate = 1.5;
   countdown = 0;
 

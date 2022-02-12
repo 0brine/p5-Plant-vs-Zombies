@@ -1,5 +1,6 @@
 var Plant = (function () {
     function Plant(cell) {
+        this.health = 300;
         this.cell = cell;
     }
     Plant.prototype.action = function () {
@@ -59,7 +60,6 @@ var Sunflower = (function (_super) {
         _this.countdown = 7;
         _this.cost = 50;
         _this.projectile = null;
-        _this.health = 4;
         if (cell == null)
             return _this;
         return _this;
@@ -95,7 +95,6 @@ var PeaShooter = (function (_super) {
         _this.actionSound = sounds.throw;
         _this.cost = 100;
         _this.projectile = Pea;
-        _this.health = 4;
         _this.fireRate = 1.5;
         _this.countdown = 0;
         if (cell == null)
@@ -115,6 +114,94 @@ var PeaShooter = (function (_super) {
     };
     return PeaShooter;
 }(Plant));
+var Zombie = (function () {
+    function Zombie() {
+        this.dmg = 100;
+        this.speed = -0.25;
+        this.x = width;
+        this.lane = floor(random(game.sizeY));
+    }
+    Object.defineProperty(Zombie.prototype, "y", {
+        get: function () {
+            return this.lane * SCALE;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Zombie.prototype.update = function () {
+        var _this = this;
+        var _a, _b;
+        this.x += this.speed * deltaTime * SCALE;
+        if (this.x < -SCALE) {
+            console.log("lost");
+            this.destroy();
+        }
+        var p;
+        p = (_b = (_a = game.grid[this.lane].filter(function (c) { return c.plant != null && c.x * SCALE < _this.x && c.x * SCALE > _this.x - SCALE; })) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.plant;
+        if (p != null) {
+            this.action(p);
+        }
+    };
+    Zombie.prototype.action = function (plant) {
+        console.log("eat");
+        plant.getEaten(this);
+    };
+    Zombie.prototype.getDmg = function (projectile) {
+        this.hp -= projectile.dmg;
+        if (this.hp <= 0) {
+            this.destroy();
+        }
+    };
+    Zombie.prototype.destroy = function () {
+        var _this = this;
+        objects.zombies.forEach(function (z, i, a) {
+            if (z === _this)
+                a.splice(i, 1);
+        });
+    };
+    return Zombie;
+}());
+var NormalZombie = (function (_super) {
+    __extends(NormalZombie, _super);
+    function NormalZombie() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.hp = 200;
+        return _this;
+    }
+    NormalZombie.prototype.draw = function (_x, _y, _size) {
+        var size = _size !== null && _size !== void 0 ? _size : 1;
+        var x = _x !== null && _x !== void 0 ? _x : this.x + (1 - size) * SCALE * 0.5;
+        var y = _y !== null && _y !== void 0 ? _y : this.y + (1 - size) * SCALE * 0.5;
+        x += SCALE * 0.5 * size;
+        y += SCALE * 0.5 * size;
+        fill("#999");
+        stroke("#333");
+        strokeWeight(SCALE * 0.1 * size);
+        circle(x, y, SCALE * 0.7 * size);
+    };
+    return NormalZombie;
+}(Zombie));
+var Level = (function () {
+    function Level() {
+        var zombieSpawns = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            zombieSpawns[_i] = arguments[_i];
+        }
+        this.zombieSpawns = zombieSpawns;
+    }
+    Level.prototype.update = function () {
+        for (var _i = 0, _a = this.zombieSpawns; _i < _a.length; _i++) {
+            var z = _a[_i];
+            if (z[1] < 0)
+                continue;
+            z[1] -= deltaTime;
+            if (z[1] < 0) {
+                objects.zombies.push(new z[0]());
+            }
+        }
+    };
+    return Level;
+}());
 var SoundHelper = (function () {
     function SoundHelper() {
         var path = [];
@@ -130,7 +217,9 @@ var SoundHelper = (function () {
     SoundHelper.prototype.play = function () {
         if (this.sounds.length <= 0)
             return;
-        this.sounds[Math.floor(random(this.sounds.length))].play();
+        var s = this.sounds[Math.floor(random(this.sounds.length))];
+        s.setVolume(sounds.volume);
+        s.play();
     };
     return SoundHelper;
 }());
@@ -140,7 +229,7 @@ var game = {
     sizeY: 5,
     SCALE: 80,
     grid: [],
-    money: 600,
+    money: 200,
     oldTime: new Date().getTime(),
 };
 var objects = {
@@ -180,11 +269,15 @@ var UI = {
     },
 };
 var sounds = {
+    volume: 0.25,
     collectSun: new SoundHelper("assets/CollectSun.ogg"),
     planted: new SoundHelper("assets/Planted.ogg"),
     splat: new SoundHelper("assets/Splat.ogg", "assets/Splat2.ogg", "assets/Splat3.ogg"),
     throw: new SoundHelper("assets/Throw.ogg", "assets/Throw2.ogg"),
 };
+var levels = [
+    new Level([NormalZombie, 30], [NormalZombie, 60], [NormalZombie, 70], [NormalZombie, 80], [NormalZombie, 90], [NormalZombie, 90], [NormalZombie, 120], [NormalZombie, 120], [NormalZombie, 120]),
+];
 var plantTypes = [Sunflower, PeaShooter];
 var selectedPlant = Sunflower;
 function preload() {
@@ -193,11 +286,12 @@ function setup() {
     console.log("started v1");
     Main.settings();
     Main.newField();
-    objects.zombies.push(new NormalZombie());
 }
 var xx = 0;
 function draw() {
     deltaTime /= 1000;
+    if (deltaTime > 1)
+        deltaTime = 0;
     background(UI.general.backgroundColor);
     Main.drawPlantBar();
     Main.drawField();
@@ -276,12 +370,16 @@ var Main = (function () {
         translate(0, UI.plantBar.sizeY);
     };
     Main.drawField = function () {
+        Main.updateZombieSpwans();
         Main.updatePlants();
         Main.updateObjects();
         Main.drawBackground();
         Main.drawPlants();
         Main.drawObjects();
         translate(0, UI.field.sizeY);
+    };
+    Main.updateZombieSpwans = function () {
+        levels[0].update();
     };
     Main.updatePlants = function () {
         var _a;
@@ -389,11 +487,6 @@ var Cell = (function () {
     };
     return Cell;
 }());
-var Game = (function () {
-    function Game() {
-    }
-    return Game;
-}());
 var Clickables = (function () {
     function Clickables(x, y) {
         this.despawnTimer = 10;
@@ -458,9 +551,9 @@ var Projectile = (function () {
         if (this.x < -SCALE || this.x > width + SCALE) {
             this.destroy();
         }
-        var z;
-        if (z = (_a = objects.zombies.filter(function (z) { return z.y === _this.y && z.x < _this.x + SCALE * _this.speed / 10; })) === null || _a === void 0 ? void 0 : _a[0]) {
-            this.action(z);
+        var zombie;
+        if (zombie = (_a = objects.zombies.filter(function (z) { return z.y === _this.y && z.x > _this.x && z.x < _this.x + SCALE * _this.speed / 10; })) === null || _a === void 0 ? void 0 : _a[0]) {
+            this.action(zombie);
         }
     };
     Projectile.prototype.action = function (zombie) {
@@ -482,7 +575,7 @@ var Pea = (function (_super) {
     function Pea(x, y) {
         var _this = _super.call(this, x, y) || this;
         _this.hitSound = sounds.splat;
-        _this.dmg = 10;
+        _this.dmg = 20;
         return _this;
     }
     Pea.prototype.draw = function (_x, _y, _size) {
@@ -498,71 +591,4 @@ var Pea = (function (_super) {
     };
     return Pea;
 }(Projectile));
-var Zombie = (function () {
-    function Zombie() {
-        this.dmg = 1;
-        this.speed = -0.25;
-        this.x = width;
-        this.lane = floor(random(game.sizeY));
-    }
-    Object.defineProperty(Zombie.prototype, "y", {
-        get: function () {
-            return this.lane * SCALE;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Zombie.prototype.update = function () {
-        var _this = this;
-        var _a, _b;
-        this.x += this.speed * deltaTime * SCALE;
-        if (this.x < -SCALE) {
-            console.log("lost");
-            this.destroy();
-        }
-        var p;
-        p = (_b = (_a = game.grid[this.lane].filter(function (c) { return c.plant != null && c.x * SCALE < _this.x && c.x * SCALE > _this.x - SCALE; })) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.plant;
-        if (p != null) {
-            this.action(p);
-        }
-    };
-    Zombie.prototype.action = function (plant) {
-        console.log("eat");
-        plant.getEaten(this);
-    };
-    Zombie.prototype.getDmg = function (projectile) {
-        this.hp -= projectile.dmg;
-        if (this.hp <= 0) {
-            this.destroy();
-        }
-    };
-    Zombie.prototype.destroy = function () {
-        var _this = this;
-        objects.zombies.forEach(function (z, i, a) {
-            if (z === _this)
-                a.splice(i, 1);
-        });
-    };
-    return Zombie;
-}());
-var NormalZombie = (function (_super) {
-    __extends(NormalZombie, _super);
-    function NormalZombie() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.hp = 100;
-        return _this;
-    }
-    NormalZombie.prototype.draw = function (_x, _y, _size) {
-        var size = _size !== null && _size !== void 0 ? _size : 1;
-        var x = _x !== null && _x !== void 0 ? _x : this.x + (1 - size) * SCALE * 0.5;
-        var y = _y !== null && _y !== void 0 ? _y : this.y + (1 - size) * SCALE * 0.5;
-        x += SCALE * 0.5 * size;
-        y += SCALE * 0.5 * size;
-        fill("#999");
-        stroke("#333");
-        strokeWeight(SCALE * 0.1 * size);
-        circle(x, y, SCALE * 0.7 * size);
-    };
-    return NormalZombie;
-}(Zombie));
 //# sourceMappingURL=build.js.map

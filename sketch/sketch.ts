@@ -1,5 +1,7 @@
 /// <reference path="plants/Sunflower.ts"/>
 /// <reference path="plants/PeaShooter.ts"/>
+/// <reference path="zombies/Normal.ts"/>
+/// <reference path="Level.ts"/>
 /// <reference path="SoundHelper.ts"/>
 
 document.addEventListener('contextmenu', event => event.preventDefault());
@@ -9,7 +11,7 @@ const game = {
   sizeY: 5,
   SCALE: 80,
   grid: [] as Cell[][],
-  money: 600,
+  money: 200,
   oldTime: new Date().getTime(),
 }
 
@@ -53,11 +55,16 @@ const UI = {
 }
 
 const sounds = {
+  volume: 0.25,
   collectSun: new SoundHelper("assets/CollectSun.ogg"),
   planted: new SoundHelper("assets/Planted.ogg"),
   splat: new SoundHelper("assets/Splat.ogg", "assets/Splat2.ogg", "assets/Splat3.ogg"),
   throw: new SoundHelper("assets/Throw.ogg", "assets/Throw2.ogg"),
 }
+
+const levels = [
+  new Level([NormalZombie, 30], [NormalZombie, 60], [NormalZombie, 70], [NormalZombie, 80], [NormalZombie, 90], [NormalZombie, 90], [NormalZombie, 120], [NormalZombie, 120], [NormalZombie, 120],),
+];
 
 const plantTypes: (new (cell: Cell) => Plant)[] = [Sunflower, PeaShooter];
 let selectedPlant: (new (cell: Cell) => Plant) = Sunflower;
@@ -70,14 +77,15 @@ function setup() {
 
   Main.settings();
   Main.newField();
-
-  objects.zombies.push(new NormalZombie());
 }
 
 let xx = 0;
 
 function draw() {
   deltaTime /= 1000;
+  if (deltaTime > 1)
+    deltaTime = 0;
+
   background(UI.general.backgroundColor);
 
   Main.drawPlantBar();
@@ -175,6 +183,7 @@ class Main {
   }
 
   static drawField() {
+    Main.updateZombieSpwans();
     Main.updatePlants();
     Main.updateObjects();
 
@@ -185,6 +194,11 @@ class Main {
 
     translate(0, UI.field.sizeY);
   }
+
+  static updateZombieSpwans() {
+    levels[0].update();
+  }
+
   static updatePlants() {
     for (const column of grid) {
       for (const cell of column) {

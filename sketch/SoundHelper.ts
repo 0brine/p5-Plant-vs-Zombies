@@ -11,6 +11,8 @@ class SoundHelper {
     if (this.sounds.length <= 0)
       return;
 
-    this.sounds[Math.floor(random(this.sounds.length))].play();
+    let s = this.sounds[Math.floor(random(this.sounds.length))];
+    s.setVolume(sounds.volume);
+    s.play();
   }
 }

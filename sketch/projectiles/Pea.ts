@@ -2,7 +2,7 @@
 
 class Pea extends Projectile {
   hitSound = sounds.splat;
-  dmg = 10;
+  dmg = 20;
 
   constructor(x: number, y: number) {
     super(x, y);

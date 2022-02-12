@@ -6,7 +6,6 @@ class Sunflower extends Plant {
   countdown = 7;
   readonly cost = 50;
   readonly projectile: (new (x: number, y: number) => Projectile) = null;
-  health = 4;
 
   constructor(cell: Cell) {
     super(cell);
