@@ -12,8 +12,9 @@ class Plant extends MyObject {
         this.health = health;
     }
     action() {
+        var _a;
         objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
-        this.actionSound.play();
+        (_a = this.actionSound) === null || _a === void 0 ? void 0 : _a.play();
     }
     update() {
         if (this.isZombieInfront()) {
@@ -51,16 +52,10 @@ class Plant extends MyObject {
 }
 class Sunflower extends Plant {
     constructor(cell) {
-        super(cell);
-        this.actionSound = new SoundHelper();
-        this.fireRate = 24;
-        this.countdown = 7;
-        this.cost = 50;
-        this.projectile = null;
+        super(cell, 50, null, null, 24, 7);
         if (cell == null)
             return;
     }
-    ;
     update() {
         if (this.countdown <= 0) {
             this.action();

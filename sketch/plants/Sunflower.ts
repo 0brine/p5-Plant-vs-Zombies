@@ -1,14 +1,8 @@
 /// <reference path="aPlant.ts"/>
 
 class Sunflower extends Plant {
-  actionSound = new SoundHelper();;
-  fireRate = 24;
-  countdown = 7;
-  readonly cost = 50;
-  readonly projectile: (new (x: number, y: number) => Projectile) = null;
-
   constructor(cell: Cell) {
-    super(cell);
+    super(cell, 50, null, null, 24, 7);
     if (cell == null) return;
   }
 

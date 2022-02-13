@@ -25,7 +25,7 @@ abstract class Plant extends MyObject {
 
   protected action() {
     objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
-    this.actionSound.play();
+    this.actionSound?.play();
   }
 
   update() {
