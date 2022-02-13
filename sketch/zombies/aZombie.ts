@@ -1,16 +1,23 @@
 abstract class Zombie extends MyObject {
   x: number;
   lane: number;
-  dmg = 100;
-  speed = -0.25;
-  abstract hp: number;
+  dmg: number;
+  speed: number;
+  readonly maxHp: number;
+  hp: number;
 
   get y() {
     return this.lane * SCALE;
   }
 
-  constructor() {
+  constructor(maxHp: number, speed = 0.25, dmg = 100) {
     super();
+
+    this.maxHp = maxHp;
+    this.hp = this.maxHp;
+    this.speed = -speed;
+    this.dmg = dmg;
+
     this.x = width;
     this.lane = floor(random(game.sizeY));
   }
@@ -48,10 +55,13 @@ abstract class Zombie extends MyObject {
   }
 
   destroy() {
-    // remove self from the array
-    objects.zombies.forEach((z, i, a) => {
-      if (z === this)
-        a.splice(i, 1);
-    });
+    Main.afterUpdateFunctions.push(
+      () => {
+        // remove self from the array
+        objects.zombies.forEach((z, i, a) => {
+          if (z === this)
+            a.splice(i, 1);
+        });
+      });
   }
 }

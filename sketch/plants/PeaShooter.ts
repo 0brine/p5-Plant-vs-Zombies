@@ -1,14 +1,8 @@
 /// <reference path="aPlant.ts"/>
 
 class Peashooter extends Plant {
-  actionSound = sounds.throw;
-  readonly cost = 100;
-  readonly projectile: (new (x: number, y: number) => Projectile) = Pea;
-  fireRate = 1.5;
-  countdown = 0;
-
   constructor(cell: Cell) {
-    super(cell);
+    super(cell, 100, Pea, sounds.throw, 1.5);
     if (cell == null) return;
   }
 

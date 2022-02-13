@@ -1,14 +1,8 @@
 /// <reference path="aPlant.ts"/>
 
 class Repeater extends Plant {
-  actionSound = sounds.throw;
-  readonly cost = 200;
-  readonly projectile: (new (x: number, y: number) => Projectile) = Pea;
-  fireRate = 1.5;
-  countdown = 0;
-
   constructor(cell: Cell) {
-    super(cell);
+    super(cell, 200, Pea, sounds.throw, 1.5);
     if (cell == null) return;
   }
 

@@ -1,18 +1,26 @@
 /// <reference path="../aMyObject.ts"/>
 
 abstract class Plant extends MyObject {
-  readonly abstract cost: number;
-  readonly abstract projectile: (new (x: number, y: number) => Projectile);
-  health = 300;
+  readonly cost: number;
+  readonly projectile: (new (x: number, y: number) => Projectile);
+  readonly actionSound: SoundHelper;
+  readonly fireRate: number;
 
-  abstract fireRate: number;
-  abstract countdown: number;
+  health: number;
+  countdown: number;
 
-  abstract actionSound: SoundHelper;
 
-  constructor(cell?: Cell) {
+  constructor(cell: Cell, cost: number, projectile: (new (x: number, y: number) => Projectile), actionSound: SoundHelper, fireRate: number, countDown = 0, health = 300) {
     super();
     this.cell = cell;
+
+    this.cost = cost;
+    this.projectile = projectile;
+    this.actionSound = actionSound;
+    this.fireRate = fireRate;
+
+    this.countdown = countDown;
+    this.health = health;
   }
 
   protected action() {

@@ -1,10 +1,15 @@
 class MyObject {
 }
 class Plant extends MyObject {
-    constructor(cell) {
+    constructor(cell, cost, projectile, actionSound, fireRate, countDown = 0, health = 300) {
         super();
-        this.health = 300;
         this.cell = cell;
+        this.cost = cost;
+        this.projectile = projectile;
+        this.actionSound = actionSound;
+        this.fireRate = fireRate;
+        this.countdown = countDown;
+        this.health = health;
     }
     action() {
         objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
@@ -80,12 +85,7 @@ class Sunflower extends Plant {
 }
 class Peashooter extends Plant {
     constructor(cell) {
-        super(cell);
-        this.actionSound = sounds.throw;
-        this.cost = 100;
-        this.projectile = Pea;
-        this.fireRate = 1.5;
-        this.countdown = 0;
+        super(cell, 100, Pea, sounds.throw, 1.5);
         if (cell == null)
             return;
     }
@@ -103,12 +103,7 @@ class Peashooter extends Plant {
 }
 class Repeater extends Plant {
     constructor(cell) {
-        super(cell);
-        this.actionSound = sounds.throw;
-        this.cost = 200;
-        this.projectile = Pea;
-        this.fireRate = 1.5;
-        this.countdown = 0;
+        super(cell, 200, Pea, sounds.throw, 1.5);
         if (cell == null)
             return;
     }
@@ -133,12 +128,7 @@ class Repeater extends Plant {
 }
 class Threepeater extends Plant {
     constructor(cell) {
-        super(cell);
-        this.actionSound = sounds.throw;
-        this.cost = 325;
-        this.projectile = Pea;
-        this.fireRate = 1.5;
-        this.countdown = 0;
+        super(cell, 325, Pea, sounds.throw, 1.5);
         if (cell == null)
             return;
     }
@@ -177,10 +167,12 @@ class Threepeater extends Plant {
     }
 }
 class Zombie extends MyObject {
-    constructor() {
+    constructor(maxHp, speed = 0.25, dmg = 100) {
         super();
-        this.dmg = 100;
-        this.speed = -0.25;
+        this.maxHp = maxHp;
+        this.hp = this.maxHp;
+        this.speed = -speed;
+        this.dmg = dmg;
         this.x = width;
         this.lane = floor(random(game.sizeY));
     }
@@ -211,27 +203,30 @@ class Zombie extends MyObject {
         }
     }
     destroy() {
-        objects.zombies.forEach((z, i, a) => {
-            if (z === this)
-                a.splice(i, 1);
+        Main.afterUpdateFunctions.push(() => {
+            objects.zombies.forEach((z, i, a) => {
+                if (z === this)
+                    a.splice(i, 1);
+            });
         });
     }
 }
 class NormalZombie extends Zombie {
     constructor() {
-        super(...arguments);
-        this.hp = 200;
+        super(200, 0.25, 100);
     }
     draw(_x, _y, _size) {
         let size = _size !== null && _size !== void 0 ? _size : 1;
         let x = _x !== null && _x !== void 0 ? _x : this.x + (1 - size) * SCALE * 0.5;
         let y = _y !== null && _y !== void 0 ? _y : this.y + (1 - size) * SCALE * 0.5;
-        x += SCALE * 0.5 * size;
-        y += SCALE * 0.5 * size;
+        size *= SCALE;
+        x += 0.5 * size;
+        y += 0.5 * size;
         fill("#999");
         stroke("#333");
-        strokeWeight(SCALE * 0.1 * size);
-        circle(x, y, SCALE * 0.7 * size);
+        strokeWeight(0.1 * size);
+        circle(x, y, 0.7 * size);
+        arc(x, y, 0.7 * size, 0.7 * size, 0, 2 * PI * this.hp / this.maxHp, OPEN);
     }
 }
 class Level {
