@@ -1,4 +1,6 @@
-abstract class Clickables {
+/// <reference path="../aMyObject.ts"/>
+
+abstract class Clickables extends MyObject {
   x: number;
   y: number;
   timeout: number;
@@ -8,6 +10,7 @@ abstract class Clickables {
   abstract collectingSound: SoundHelper;
 
   constructor(x: number, y: number) {
+    super();
     this.x = x;
     this.y = y;
   }
@@ -28,11 +31,14 @@ abstract class Clickables {
   }
 
   destroy(): void {
-    // remove self from the array
-    objects.clickables.forEach((s, i, a) => {
-      if (s === this)
-        a.splice(i, 1);
-    });
+    Main.afterUpdateFunctions.push(
+      () => {
+        // remove self from the array
+        objects.clickables.forEach((s, i, a) => {
+          if (s === this)
+            a.splice(i, 1);
+        });
+      });
 
     clearTimeout(this.timeout);
   }

@@ -1,4 +1,4 @@
-abstract class Zombie {
+abstract class Zombie extends MyObject {
   x: number;
   lane: number;
   dmg = 100;
@@ -10,6 +10,7 @@ abstract class Zombie {
   }
 
   constructor() {
+    super();
     this.x = width;
     this.lane = floor(random(game.sizeY));
   }

@@ -1,13 +1,16 @@
-var Plant = (function () {
-    function Plant(cell) {
+class MyObject {
+}
+class Plant extends MyObject {
+    constructor(cell) {
+        super();
         this.health = 300;
         this.cell = cell;
     }
-    Plant.prototype.action = function () {
+    action() {
         objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
         this.actionSound.play();
-    };
-    Plant.prototype.update = function () {
+    }
+    update() {
         if (this.isZombieInfront()) {
             if (this.countdown <= 0) {
                 this.action();
@@ -18,180 +21,225 @@ var Plant = (function () {
         else {
             this.countdown = 0;
         }
-    };
-    Plant.prototype.getEaten = function (zombie) {
+    }
+    getEaten(zombie) {
         this.health -= zombie.dmg;
         if (this.health <= 0) {
             this.destroy();
         }
-    };
-    Plant.prototype.destroy = function () {
+    }
+    destroy() {
         this.cell.plant = null;
-    };
-    Plant.prototype.isZombieInfront = function () {
-        var _this = this;
-        return objects.zombies.filter(function (z) { return z.lane === _this.cell.y && z.x > _this.cell.x * SCALE; }).length > 0;
-    };
-    Plant.prototype.isZombieBehind = function () {
-        var _this = this;
-        return objects.zombies.filter(function (z) { return z.lane === _this.cell.y && z.x < _this.cell.x * SCALE; }).length > 0;
-    };
-    return Plant;
-}());
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var Sunflower = (function (_super) {
-    __extends(Sunflower, _super);
-    function Sunflower(cell) {
-        var _this = _super.call(this, cell) || this;
-        _this.actionSound = new SoundHelper();
-        _this.fireRate = 24;
-        _this.countdown = 7;
-        _this.cost = 50;
-        _this.projectile = null;
+    }
+    isZombieInfront(...laneOffsets) {
+        if (laneOffsets.length === 0) {
+            laneOffsets.push(0);
+        }
+        return objects.zombies.filter((z) => laneOffsets.includes(z.lane - this.cell.y) && z.x > this.cell.x * SCALE).length > 0;
+    }
+    isZombieBehind(...laneOffsets) {
+        if (laneOffsets.length === 0) {
+            laneOffsets.push(0);
+        }
+        return objects.zombies.filter((z) => laneOffsets.includes(z.lane - this.cell.y) && z.x < this.cell.x * SCALE).length > 0;
+    }
+}
+class Sunflower extends Plant {
+    constructor(cell) {
+        super(cell);
+        this.actionSound = new SoundHelper();
+        this.fireRate = 24;
+        this.countdown = 7;
+        this.cost = 50;
+        this.projectile = null;
         if (cell == null)
-            return _this;
-        return _this;
+            return;
     }
     ;
-    Sunflower.prototype.update = function () {
+    update() {
         if (this.countdown <= 0) {
             this.action();
             this.countdown += this.fireRate;
         }
         this.countdown -= deltaTime;
-    };
-    Sunflower.prototype.action = function () {
+    }
+    action() {
         objects.clickables.push(new Sun(this.cell.x * SCALE + random(SCALE * 0.25), this.cell.y * SCALE + random(SCALE * 0.25)));
-    };
-    Sunflower.prototype.draw = function (_x, _y, _size) {
-        var size = _size !== null && _size !== void 0 ? _size : 1;
-        var x = _x !== null && _x !== void 0 ? _x : this.cell.x * SCALE + (1 - size) * SCALE * 0.5;
-        var y = _y !== null && _y !== void 0 ? _y : this.cell.y * SCALE + (1 - size) * SCALE * 0.5;
+    }
+    draw(_x, _y, _size) {
+        let size = _size !== null && _size !== void 0 ? _size : 1;
+        let x = _x !== null && _x !== void 0 ? _x : this.cell.x * SCALE + (1 - size) * SCALE * 0.5;
+        let y = _y !== null && _y !== void 0 ? _y : this.cell.y * SCALE + (1 - size) * SCALE * 0.5;
         x += SCALE * 0.5 * size;
         y += SCALE * 0.5 * size;
         noFill();
         stroke("#ffcc00");
         strokeWeight(SCALE * 0.1 * size);
         circle(x, y, SCALE * 0.7 * size);
-    };
-    return Sunflower;
-}(Plant));
-var PeaShooter = (function (_super) {
-    __extends(PeaShooter, _super);
-    function PeaShooter(cell) {
-        var _this = _super.call(this, cell) || this;
-        _this.actionSound = sounds.throw;
-        _this.cost = 100;
-        _this.projectile = Pea;
-        _this.fireRate = 1.5;
-        _this.countdown = 0;
-        if (cell == null)
-            return _this;
-        return _this;
     }
-    PeaShooter.prototype.draw = function (_x, _y, _size) {
-        var size = _size !== null && _size !== void 0 ? _size : 1;
-        var x = _x !== null && _x !== void 0 ? _x : this.cell.x * SCALE + (1 - size) * SCALE * 0.5;
-        var y = _y !== null && _y !== void 0 ? _y : this.cell.y * SCALE + (1 - size) * SCALE * 0.5;
+}
+class Peashooter extends Plant {
+    constructor(cell) {
+        super(cell);
+        this.actionSound = sounds.throw;
+        this.cost = 100;
+        this.projectile = Pea;
+        this.fireRate = 1.5;
+        this.countdown = 0;
+        if (cell == null)
+            return;
+    }
+    draw(_x, _y, _size) {
+        let size = _size !== null && _size !== void 0 ? _size : 1;
+        let x = _x !== null && _x !== void 0 ? _x : this.cell.x * SCALE + (1 - size) * SCALE * 0.5;
+        let y = _y !== null && _y !== void 0 ? _y : this.cell.y * SCALE + (1 - size) * SCALE * 0.5;
         x += SCALE * 0.5 * size;
         y += SCALE * 0.5 * size;
         noFill();
         stroke("#99ff00");
         strokeWeight(SCALE * 0.1 * size);
         circle(x, y, SCALE * 0.7 * size);
-    };
-    return PeaShooter;
-}(Plant));
-var Zombie = (function () {
-    function Zombie() {
+    }
+}
+class Repeater extends Plant {
+    constructor(cell) {
+        super(cell);
+        this.actionSound = sounds.throw;
+        this.cost = 200;
+        this.projectile = Pea;
+        this.fireRate = 1.5;
+        this.countdown = 0;
+        if (cell == null)
+            return;
+    }
+    action() {
+        objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
+        objects.projectiles.push(new this.projectile(this.cell.x * SCALE + SCALE * 0.5, this.cell.y * SCALE));
+        this.actionSound.play();
+    }
+    draw(_x, _y, _size) {
+        let size = _size !== null && _size !== void 0 ? _size : 1;
+        let x = _x !== null && _x !== void 0 ? _x : this.cell.x * SCALE + (1 - size) * SCALE * 0.5;
+        let y = _y !== null && _y !== void 0 ? _y : this.cell.y * SCALE + (1 - size) * SCALE * 0.5;
+        size *= SCALE;
+        x += 0.5 * size;
+        y += 0.5 * size;
+        noFill();
+        stroke("#99ff00");
+        strokeWeight(0.1 * size);
+        circle(x, y, 0.7 * size);
+        triangle(x - size * 0.25, y - size * 0.25, x - size * 0.3, y - size * 0.275, x - size * 0.275, y - size * 0.3);
+    }
+}
+class Threepeater extends Plant {
+    constructor(cell) {
+        super(cell);
+        this.actionSound = sounds.throw;
+        this.cost = 325;
+        this.projectile = Pea;
+        this.fireRate = 1.5;
+        this.countdown = 0;
+        if (cell == null)
+            return;
+    }
+    action() {
+        objects.projectiles.push(new this.projectile(this.cell.x * SCALE, (this.cell.y - 1) * SCALE));
+        objects.projectiles.push(new this.projectile(this.cell.x * SCALE, this.cell.y * SCALE));
+        objects.projectiles.push(new this.projectile(this.cell.x * SCALE, (this.cell.y + 1) * SCALE));
+        this.actionSound.play();
+    }
+    update() {
+        if (this.isZombieInfront(-1, 0, 1)) {
+            if (this.countdown <= 0) {
+                this.action();
+                this.countdown += this.fireRate;
+            }
+            this.countdown -= deltaTime;
+        }
+        else {
+            this.countdown = 0;
+        }
+    }
+    draw(_x, _y, _size) {
+        let size = _size !== null && _size !== void 0 ? _size : 1;
+        let x = _x !== null && _x !== void 0 ? _x : this.cell.x * SCALE + (1 - size) * SCALE * 0.5;
+        let y = _y !== null && _y !== void 0 ? _y : this.cell.y * SCALE + (1 - size) * SCALE * 0.5;
+        size *= SCALE;
+        x += 0.5 * size;
+        y += 0.5 * size;
+        noFill();
+        stroke("#99ff00");
+        strokeWeight(0.1 * size);
+        circle(x, y, 0.7 * size);
+        triangle(x - size * 0.25, y - size * 0.25, x - size * 0.3, y - size * 0.275, x - size * 0.275, y - size * 0.3);
+        triangle(x - size * 0.25, y + size * 0.25, x - size * 0.3, y + size * 0.275, x - size * 0.275, y + size * 0.3);
+        triangle(x - size * 0.3, y, x - size * 0.4, y + size * 0.05, x - size * 0.4, y - size * 0.05);
+    }
+}
+class Zombie extends MyObject {
+    constructor() {
+        super();
         this.dmg = 100;
         this.speed = -0.25;
         this.x = width;
         this.lane = floor(random(game.sizeY));
     }
-    Object.defineProperty(Zombie.prototype, "y", {
-        get: function () {
-            return this.lane * SCALE;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Zombie.prototype.update = function () {
-        var _this = this;
+    get y() {
+        return this.lane * SCALE;
+    }
+    update() {
         var _a, _b;
         this.x += this.speed * deltaTime * SCALE;
         if (this.x < -SCALE) {
             console.log("lost");
             this.destroy();
         }
-        var p;
-        p = (_b = (_a = game.grid[this.lane].filter(function (c) { return c.plant != null && c.x * SCALE < _this.x && c.x * SCALE > _this.x - SCALE; })) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.plant;
+        let p;
+        p = (_b = (_a = game.grid[this.lane].filter((c) => c.plant != null && c.x * SCALE < this.x && c.x * SCALE > this.x - SCALE)) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.plant;
         if (p != null) {
             this.action(p);
         }
-    };
-    Zombie.prototype.action = function (plant) {
+    }
+    action(plant) {
         console.log("eat");
         plant.getEaten(this);
-    };
-    Zombie.prototype.getDmg = function (projectile) {
+    }
+    getDmg(projectile) {
         this.hp -= projectile.dmg;
         if (this.hp <= 0) {
             this.destroy();
         }
-    };
-    Zombie.prototype.destroy = function () {
-        var _this = this;
-        objects.zombies.forEach(function (z, i, a) {
-            if (z === _this)
+    }
+    destroy() {
+        objects.zombies.forEach((z, i, a) => {
+            if (z === this)
                 a.splice(i, 1);
         });
-    };
-    return Zombie;
-}());
-var NormalZombie = (function (_super) {
-    __extends(NormalZombie, _super);
-    function NormalZombie() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.hp = 200;
-        return _this;
     }
-    NormalZombie.prototype.draw = function (_x, _y, _size) {
-        var size = _size !== null && _size !== void 0 ? _size : 1;
-        var x = _x !== null && _x !== void 0 ? _x : this.x + (1 - size) * SCALE * 0.5;
-        var y = _y !== null && _y !== void 0 ? _y : this.y + (1 - size) * SCALE * 0.5;
+}
+class NormalZombie extends Zombie {
+    constructor() {
+        super(...arguments);
+        this.hp = 200;
+    }
+    draw(_x, _y, _size) {
+        let size = _size !== null && _size !== void 0 ? _size : 1;
+        let x = _x !== null && _x !== void 0 ? _x : this.x + (1 - size) * SCALE * 0.5;
+        let y = _y !== null && _y !== void 0 ? _y : this.y + (1 - size) * SCALE * 0.5;
         x += SCALE * 0.5 * size;
         y += SCALE * 0.5 * size;
         fill("#999");
         stroke("#333");
         strokeWeight(SCALE * 0.1 * size);
         circle(x, y, SCALE * 0.7 * size);
-    };
-    return NormalZombie;
-}(Zombie));
-var Level = (function () {
-    function Level() {
-        var zombieSpawns = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            zombieSpawns[_i] = arguments[_i];
-        }
+    }
+}
+class Level {
+    constructor(...zombieSpawns) {
         this.zombieSpawns = zombieSpawns;
     }
-    Level.prototype.update = function () {
-        for (var _i = 0, _a = this.zombieSpawns; _i < _a.length; _i++) {
-            var z = _a[_i];
+    update() {
+        for (const z of this.zombieSpawns) {
             if (z[1] < 0)
                 continue;
             z[1] -= deltaTime;
@@ -199,46 +247,39 @@ var Level = (function () {
                 objects.zombies.push(new z[0]());
             }
         }
-    };
-    return Level;
-}());
-var SoundHelper = (function () {
-    function SoundHelper() {
-        var path = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            path[_i] = arguments[_i];
-        }
+    }
+}
+class SoundHelper {
+    constructor(...path) {
         this.sounds = [];
-        for (var _a = 0, path_1 = path; _a < path_1.length; _a++) {
-            var p = path_1[_a];
+        for (const p of path) {
             this.sounds.push(new p5.SoundFile(p));
         }
     }
-    SoundHelper.prototype.play = function () {
+    play() {
         if (this.sounds.length <= 0)
             return;
-        var s = this.sounds[Math.floor(random(this.sounds.length))];
+        let s = this.sounds[Math.floor(random(this.sounds.length))];
         s.setVolume(sounds.volume);
         s.play();
-    };
-    return SoundHelper;
-}());
-document.addEventListener('contextmenu', function (event) { return event.preventDefault(); });
-var game = {
+    }
+}
+document.addEventListener('contextmenu', event => event.preventDefault());
+const game = {
     sizeX: 9,
     sizeY: 5,
     SCALE: 80,
     grid: [],
-    money: 200,
+    money: 700,
     oldTime: new Date().getTime(),
 };
-var objects = {
+const objects = {
     clickables: [],
     projectiles: [],
     zombies: [],
 };
-var sizeX = game.sizeX, sizeY = game.sizeY, SCALE = game.SCALE, grid = game.grid;
-var UI = {
+const { sizeX, sizeY, SCALE, grid } = game;
+const UI = {
     general: {
         backgroundColor: "#4a752c",
     },
@@ -268,18 +309,18 @@ var UI = {
         textSize: 0.5 * SCALE,
     },
 };
-var sounds = {
+const sounds = {
     volume: 0.25,
     collectSun: new SoundHelper("assets/CollectSun.ogg"),
     planted: new SoundHelper("assets/Planted.ogg"),
     splat: new SoundHelper("assets/Splat.ogg", "assets/Splat2.ogg", "assets/Splat3.ogg"),
     throw: new SoundHelper("assets/Throw.ogg", "assets/Throw2.ogg"),
 };
-var levels = [
-    new Level([NormalZombie, 30], [NormalZombie, 60], [NormalZombie, 70], [NormalZombie, 80], [NormalZombie, 90], [NormalZombie, 90], [NormalZombie, 120], [NormalZombie, 120], [NormalZombie, 120]),
+const levels = [
+    new Level([NormalZombie, 0], [NormalZombie, 60], [NormalZombie, 70], [NormalZombie, 80], [NormalZombie, 90], [NormalZombie, 90], [NormalZombie, 120], [NormalZombie, 120], [NormalZombie, 120]),
 ];
-var plantTypes = [Sunflower, PeaShooter];
-var selectedPlant = Sunflower;
+const plantTypes = [Sunflower, Peashooter, Repeater, Threepeater];
+let selectedPlant = Sunflower;
 function preload() {
 }
 function setup() {
@@ -287,25 +328,23 @@ function setup() {
     Main.settings();
     Main.newField();
 }
-var xx = 0;
+let xx = 0;
 function draw() {
-    deltaTime /= 1000;
-    if (deltaTime > 1)
-        deltaTime = 0;
+    Main.update();
     background(UI.general.backgroundColor);
     Main.drawPlantBar();
     Main.drawField();
     Main.drawStatusBar();
 }
 function mouseClicked() {
-    var x = mouseX;
-    var y = mouseY;
+    let x = mouseX;
+    let y = mouseY;
     if (x < 0 || x > width || y < 0 || y > height) {
         return;
     }
     if (y < UI.plantBar.sizeY) {
         if (x < UI.plantBar.card.sizeX * plantTypes.length) {
-            var plantIndex = floor(x / UI.plantBar.card.sizeX);
+            let plantIndex = floor(x / UI.plantBar.card.sizeX);
             selectedPlant = plantTypes[plantIndex];
             return;
         }
@@ -313,8 +352,7 @@ function mouseClicked() {
     }
     y -= UI.plantBar.sizeY;
     if (y < UI.field.sizeY) {
-        for (var _i = 0, _a = objects.clickables; _i < _a.length; _i++) {
-            var clickable = _a[_i];
+        for (const clickable of objects.clickables) {
             if (x > clickable.x && x < clickable.x + SCALE * clickable.size && y > clickable.y && y < clickable.y + SCALE * clickable.size) {
                 clickable.action();
                 return;
@@ -331,92 +369,94 @@ function mouseClicked() {
     }
     y -= UI.field.sizeY;
 }
-var Main = (function () {
-    function Main() {
+class Main {
+    static update() {
+        deltaTime /= 1000;
+        if (deltaTime > 1)
+            deltaTime = 0;
+        Main.updateZombieSpwans();
+        Main.updatePlants();
+        Main.updateObjects();
+        while (Main.afterUpdateFunctions.length > 0) {
+            Main.afterUpdateFunctions.shift()();
+        }
     }
-    Main.settings = function () {
+    static settings() {
         textFont("Bradley Hand");
-    };
-    Main.newField = function () {
-        for (var y = 0; y < sizeY; y++) {
+    }
+    static newField() {
+        for (let y = 0; y < sizeY; y++) {
             grid[y] = [];
-            for (var x = 0; x < sizeX; x++) {
+            for (let x = 0; x < sizeX; x++) {
                 grid[y][x] = new Cell(x, y);
             }
         }
         createCanvas(UI.field.sizeX, UI.plantBar.sizeY + UI.field.sizeY + UI.statusbar.sizeY);
-    };
-    Main.drawPlantBar = function () {
+    }
+    static drawPlantBar() {
         strokeWeight(UI.plantBar.card.borderSize);
         stroke(UI.plantBar.card.borderColor);
-        for (var i = 0; i < plantTypes.length; i++) {
+        for (let i = 0; i < plantTypes.length; i++) {
             fill(UI.plantBar.card.backgroundColor);
             if (plantTypes[i] == selectedPlant) {
                 fill(UI.plantBar.card.backgroundColorSelected);
             }
             rect(i * UI.plantBar.card.sizeX, 0, UI.plantBar.card.sizeX, UI.plantBar.card.sizeY);
         }
-        for (var i = 0; i < plantTypes.length; i++) {
-            var pt = plantTypes[i];
-            var p = new pt(null);
+        for (let i = 0; i < plantTypes.length; i++) {
+            let pt = plantTypes[i];
+            let p = new pt(null);
             p.draw(i * UI.plantBar.card.sizeX, 0, 2);
             textAlign(CENTER, TOP);
             textSize(SCALE * 0.5);
             fill("#fff");
             stroke("#000");
             strokeWeight(SCALE * 0.05);
-            text("$ " + p.cost, i * UI.plantBar.card.sizeX + UI.plantBar.card.textOffsetX, UI.plantBar.card.textOffsetY);
+            text(`$ ${p.cost}`, i * UI.plantBar.card.sizeX + UI.plantBar.card.textOffsetX, UI.plantBar.card.textOffsetY);
         }
         translate(0, UI.plantBar.sizeY);
-    };
-    Main.drawField = function () {
-        Main.updateZombieSpwans();
-        Main.updatePlants();
-        Main.updateObjects();
+    }
+    static drawField() {
         Main.drawBackground();
         Main.drawPlants();
         Main.drawObjects();
         translate(0, UI.field.sizeY);
-    };
-    Main.updateZombieSpwans = function () {
+    }
+    static updateZombieSpwans() {
         levels[0].update();
-    };
-    Main.updatePlants = function () {
+    }
+    static updatePlants() {
         var _a;
-        for (var _i = 0, grid_1 = grid; _i < grid_1.length; _i++) {
-            var column = grid_1[_i];
-            for (var _b = 0, column_1 = column; _b < column_1.length; _b++) {
-                var cell = column_1[_b];
+        for (const column of grid) {
+            for (const cell of column) {
                 (_a = cell.plant) === null || _a === void 0 ? void 0 : _a.update();
             }
         }
-    };
-    Main.updateObjects = function () {
+    }
+    static updateObjects() {
         Main.updateClickables();
         Main.updateProjectiles();
         Main.updateZombies();
-    };
-    Main.updateClickables = function () {
-        for (var _i = 0, _a = objects.clickables; _i < _a.length; _i++) {
-            var clickable = _a[_i];
+    }
+    static updateClickables() {
+        const clickables = objects.clickables;
+        for (const clickable of clickables) {
             clickable.update();
         }
-    };
-    Main.updateZombies = function () {
-        for (var _i = 0, _a = objects.zombies; _i < _a.length; _i++) {
-            var zombie = _a[_i];
+    }
+    static updateZombies() {
+        for (const zombie of objects.zombies) {
             zombie.update();
         }
-    };
-    Main.updateProjectiles = function () {
-        for (var _i = 0, _a = objects.projectiles; _i < _a.length; _i++) {
-            var projectile = _a[_i];
+    }
+    static updateProjectiles() {
+        for (const projectile of objects.projectiles) {
             projectile.update();
         }
-    };
-    Main.drawBackground = function () {
-        for (var x = 0; x < sizeX; x++) {
-            for (var y = 0; y < sizeY; y++) {
+    }
+    static drawBackground() {
+        for (let x = 0; x < sizeX; x++) {
+            for (let y = 0; y < sizeY; y++) {
                 if (x % 2 === y % 2) {
                     fill(UI.field.darkGrass);
                 }
@@ -427,168 +467,159 @@ var Main = (function () {
                 rect(x * SCALE, y * SCALE, SCALE, SCALE);
             }
         }
-    };
-    Main.drawPlants = function () {
+    }
+    static drawPlants() {
         var _a;
-        for (var x = 0; x < sizeX; x++) {
-            for (var y = 0; y < sizeY; y++) {
+        for (let x = 0; x < sizeX; x++) {
+            for (let y = 0; y < sizeY; y++) {
                 (_a = game.grid[y][x].plant) === null || _a === void 0 ? void 0 : _a.draw();
             }
         }
-    };
-    Main.drawObjects = function () {
+    }
+    static drawObjects() {
         Main.drawZombies();
         Main.drawProjectiles();
         Main.drawClickables();
-    };
-    Main.drawZombies = function () {
-        for (var _i = 0, _a = objects.zombies; _i < _a.length; _i++) {
-            var zombie = _a[_i];
+    }
+    static drawZombies() {
+        for (const zombie of objects.zombies) {
             zombie.draw();
         }
-    };
-    Main.drawProjectiles = function () {
-        for (var _i = 0, _a = objects.projectiles; _i < _a.length; _i++) {
-            var projectile = _a[_i];
+    }
+    static drawProjectiles() {
+        for (const projectile of objects.projectiles) {
             projectile.draw();
         }
-    };
-    Main.drawClickables = function () {
-        for (var _i = 0, _a = objects.clickables; _i < _a.length; _i++) {
-            var clickable = _a[_i];
+    }
+    static drawClickables() {
+        for (const clickable of objects.clickables) {
             clickable.draw();
         }
-    };
-    Main.drawStatusBar = function () {
+    }
+    static drawStatusBar() {
         noStroke();
         textAlign(LEFT, TOP);
         textSize(UI.statusbar.textSize);
         fill("#ffffff");
-        text("$ " + game.money, UI.statusbar.textOffsetX, UI.statusbar.textOffsetY);
+        text(`$ ${game.money}`, UI.statusbar.textOffsetX, UI.statusbar.textOffsetY);
         translate(0, UI.statusbar.sizeY);
-    };
-    return Main;
-}());
-var Cell = (function () {
-    function Cell(x, y) {
+    }
+}
+Main.afterUpdateFunctions = [];
+class Cell {
+    constructor(x, y) {
         this.x = x;
         this.y = y;
     }
-    Cell.prototype.build = function (plant) {
+    build(plant) {
         if (this.plant != null) {
             return;
         }
-        var plantInstance = new plant(null);
+        const plantInstance = new plant(null);
         if (plantInstance.cost <= game.money) {
             sounds.planted.play();
             this.plant = new plant(this);
             game.money -= plantInstance.cost;
         }
-    };
-    return Cell;
-}());
-var Clickables = (function () {
-    function Clickables(x, y) {
+    }
+}
+class Clickables extends MyObject {
+    constructor(x, y) {
+        super();
         this.despawnTimer = 10;
         this.size = 1;
         this.x = x;
         this.y = y;
     }
-    Clickables.prototype.action = function () {
+    action() {
         this.customAction();
         this.collectingSound.play();
         this.destroy();
-    };
-    Clickables.prototype.update = function () {
+    }
+    update() {
         this.despawnTimer -= deltaTime;
         if (this.despawnTimer <= 0) {
             this.destroy();
         }
-    };
-    Clickables.prototype.destroy = function () {
-        var _this = this;
-        objects.clickables.forEach(function (s, i, a) {
-            if (s === _this)
-                a.splice(i, 1);
+    }
+    destroy() {
+        Main.afterUpdateFunctions.push(() => {
+            objects.clickables.forEach((s, i, a) => {
+                if (s === this)
+                    a.splice(i, 1);
+            });
         });
         clearTimeout(this.timeout);
-    };
-    return Clickables;
-}());
-var Sun = (function (_super) {
-    __extends(Sun, _super);
-    function Sun(x, y) {
-        var _this = _super.call(this, x, y) || this;
-        _this.collectingSound = sounds.collectSun;
-        return _this;
     }
-    Sun.prototype.draw = function (_x, _y, _size) {
-        var size = _size !== null && _size !== void 0 ? _size : this.size;
-        var x = _x !== null && _x !== void 0 ? _x : this.x;
-        var y = _y !== null && _y !== void 0 ? _y : this.y;
+}
+class Sun extends Clickables {
+    constructor(x, y) {
+        super(x, y);
+        this.collectingSound = sounds.collectSun;
+    }
+    draw(_x, _y, _size) {
+        let size = _size !== null && _size !== void 0 ? _size : this.size;
+        let x = _x !== null && _x !== void 0 ? _x : this.x;
+        let y = _y !== null && _y !== void 0 ? _y : this.y;
         x += SCALE * 0.5 * size;
         y += SCALE * 0.5 * size;
         fill("#ffff00");
         stroke("#ffcc00");
         strokeWeight(SCALE * 0.2 * size);
         circle(x, y, SCALE * 0.3 * size);
-    };
-    Sun.prototype.customAction = function () {
+    }
+    customAction() {
         game.money += 25;
-    };
-    return Sun;
-}(Clickables));
-var Projectile = (function () {
-    function Projectile(x, y) {
+    }
+}
+class Projectile extends MyObject {
+    constructor(x, y) {
+        super();
         this.speed = 5;
         this.x = x;
         this.y = y;
     }
-    Projectile.prototype.update = function () {
-        var _this = this;
+    update() {
         var _a;
         this.x += this.speed * deltaTime * SCALE;
         if (this.x < -SCALE || this.x > width + SCALE) {
             this.destroy();
         }
-        var zombie;
-        if (zombie = (_a = objects.zombies.filter(function (z) { return z.y === _this.y && z.x > _this.x && z.x < _this.x + SCALE * _this.speed / 10; })) === null || _a === void 0 ? void 0 : _a[0]) {
+        let zombie;
+        if (zombie = (_a = objects.zombies.filter((z) => z.y === this.y && z.x > this.x && z.x < this.x + SCALE * this.speed / 10)) === null || _a === void 0 ? void 0 : _a[0]) {
             this.action(zombie);
         }
-    };
-    Projectile.prototype.action = function (zombie) {
+    }
+    action(zombie) {
         zombie.getDmg(this);
         this.hitSound.play();
         this.destroy();
-    };
-    Projectile.prototype.destroy = function () {
-        var _this = this;
-        objects.projectiles.forEach(function (p, i, a) {
-            if (p === _this)
-                a.splice(i, 1);
-        });
-    };
-    return Projectile;
-}());
-var Pea = (function (_super) {
-    __extends(Pea, _super);
-    function Pea(x, y) {
-        var _this = _super.call(this, x, y) || this;
-        _this.hitSound = sounds.splat;
-        _this.dmg = 20;
-        return _this;
     }
-    Pea.prototype.draw = function (_x, _y, _size) {
-        var size = _size !== null && _size !== void 0 ? _size : 1;
-        var x = _x !== null && _x !== void 0 ? _x : this.x;
-        var y = _y !== null && _y !== void 0 ? _y : this.y;
+    destroy() {
+        Main.afterUpdateFunctions.push(() => {
+            objects.projectiles.forEach((p, i, a) => {
+                if (p === this)
+                    a.splice(i, 1);
+            });
+        });
+    }
+}
+class Pea extends Projectile {
+    constructor(x, y) {
+        super(x, y);
+        this.hitSound = sounds.splat;
+        this.dmg = 20;
+    }
+    draw(_x, _y, _size) {
+        let size = _size !== null && _size !== void 0 ? _size : 1;
+        let x = _x !== null && _x !== void 0 ? _x : this.x;
+        let y = _y !== null && _y !== void 0 ? _y : this.y;
         x += SCALE * 0.5 * size;
         y += SCALE * 0.5 * size;
         fill("#99ff00");
         stroke("#77dd00");
         strokeWeight(SCALE * 0.05 * size);
         circle(x, y, SCALE * 0.35 * size);
-    };
-    return Pea;
-}(Projectile));
+    }
+}
 //# sourceMappingURL=build.js.map

@@ -1,5 +1,7 @@
 /// <reference path="plants/Sunflower.ts"/>
-/// <reference path="plants/PeaShooter.ts"/>
+/// <reference path="plants/Peashooter.ts"/>
+/// <reference path="plants/Repeater.ts"/>
+/// <reference path="plants/Threepeater.ts"/>
 /// <reference path="zombies/Normal.ts"/>
 /// <reference path="Level.ts"/>
 /// <reference path="SoundHelper.ts"/>
@@ -11,7 +13,7 @@ const game = {
   sizeY: 5,
   SCALE: 80,
   grid: [] as Cell[][],
-  money: 200,
+  money: 700,
   oldTime: new Date().getTime(),
 }
 
@@ -63,10 +65,10 @@ const sounds = {
 }
 
 const levels = [
-  new Level([NormalZombie, 30], [NormalZombie, 60], [NormalZombie, 70], [NormalZombie, 80], [NormalZombie, 90], [NormalZombie, 90], [NormalZombie, 120], [NormalZombie, 120], [NormalZombie, 120],),
+  new Level([NormalZombie, 0], [NormalZombie, 60], [NormalZombie, 70], [NormalZombie, 80], [NormalZombie, 90], [NormalZombie, 90], [NormalZombie, 120], [NormalZombie, 120], [NormalZombie, 120],),
 ];
 
-const plantTypes: (new (cell: Cell) => Plant)[] = [Sunflower, PeaShooter];
+const plantTypes: (new (cell: Cell) => Plant)[] = [Sunflower, Peashooter, Repeater, Threepeater];
 let selectedPlant: (new (cell: Cell) => Plant) = Sunflower;
 
 function preload() {
@@ -82,9 +84,7 @@ function setup() {
 let xx = 0;
 
 function draw() {
-  deltaTime /= 1000;
-  if (deltaTime > 1)
-    deltaTime = 0;
+  Main.update();
 
   background(UI.general.backgroundColor);
 
@@ -139,6 +139,22 @@ function mouseClicked() {
 }
 
 class Main {
+  static afterUpdateFunctions: (() => void)[] = [];
+
+  static update() {
+    deltaTime /= 1000;
+    if (deltaTime > 1)
+      deltaTime = 0;
+
+    Main.updateZombieSpwans();
+    Main.updatePlants();
+    Main.updateObjects();
+
+    while (Main.afterUpdateFunctions.length > 0) {
+      Main.afterUpdateFunctions.shift()();
+    }
+  }
+
   static settings() {
     textFont("Bradley Hand");
   }
@@ -183,10 +199,6 @@ class Main {
   }
 
   static drawField() {
-    Main.updateZombieSpwans();
-    Main.updatePlants();
-    Main.updateObjects();
-
     Main.drawBackground();
 
     Main.drawPlants();
@@ -214,7 +226,8 @@ class Main {
   }
 
   static updateClickables() {
-    for (const clickable of objects.clickables) {
+    const clickables = objects.clickables;
+    for (const clickable of clickables) {
       clickable.update();
     }
   }

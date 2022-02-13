@@ -1,4 +1,6 @@
-abstract class Plant {
+/// <reference path="../aMyObject.ts"/>
+
+abstract class Plant extends MyObject {
   readonly abstract cost: number;
   readonly abstract projectile: (new (x: number, y: number) => Projectile);
   health = 300;
@@ -9,6 +11,7 @@ abstract class Plant {
   abstract actionSound: SoundHelper;
 
   constructor(cell?: Cell) {
+    super();
     this.cell = cell;
   }
 
@@ -40,12 +43,18 @@ abstract class Plant {
     this.cell.plant = null;
   }
 
-  protected isZombieInfront() {
-    return objects.zombies.filter((z) => z.lane === this.cell.y && z.x > this.cell.x * SCALE).length > 0;
+  protected isZombieInfront(...laneOffsets: number[]) {
+    if (laneOffsets.length === 0) {
+      laneOffsets.push(0);
+    }
+    return objects.zombies.filter((z) => laneOffsets.includes(z.lane - this.cell.y) && z.x > this.cell.x * SCALE).length > 0;
   }
 
-  protected isZombieBehind() {
-    return objects.zombies.filter((z) => z.lane === this.cell.y && z.x < this.cell.x * SCALE).length > 0;
+  protected isZombieBehind(...laneOffsets: number[]) {
+    if (laneOffsets.length === 0) {
+      laneOffsets.push(0);
+    }
+    return objects.zombies.filter((z) => laneOffsets.includes(z.lane - this.cell.y) && z.x < this.cell.x * SCALE).length > 0;
   }
 
   abstract draw(_x?: number, _y?: number, _size?: number): void;

@@ -1,4 +1,4 @@
-abstract class Projectile {
+abstract class Projectile extends MyObject {
   x: number;
   y: number;
   abstract dmg: number;
@@ -6,6 +6,7 @@ abstract class Projectile {
   speed = 5;
 
   constructor(x: number, y: number) {
+    super();
     this.x = x;
     this.y = y;
   }
@@ -32,10 +33,13 @@ abstract class Projectile {
   }
 
   destroy(): void {
-    // remove self from the array
-    objects.projectiles.forEach((p, i, a) => {
-      if (p === this)
-        a.splice(i, 1);
-    });
+    Main.afterUpdateFunctions.push(
+      () => {
+        // remove self from the array
+        objects.projectiles.forEach((p, i, a) => {
+          if (p === this)
+            a.splice(i, 1);
+        });
+      });
   }
 }
