@@ -218,10 +218,11 @@ class NormalZombie extends Zombie {
         x += 0.5 * size;
         y += 0.5 * size;
         fill("#999");
-        stroke("#333");
+        noStroke();
         strokeWeight(0.1 * size);
         circle(x, y, 0.7 * size);
-        arc(x, y, 0.7 * size, 0.7 * size, 0, 2 * PI * this.hp / this.maxHp, OPEN);
+        stroke("#333");
+        arc(x, y, 0.7 * size, 0.7 * size, -2 * PI * this.hp / this.maxHp - PI * 0.5, -PI * 0.5, OPEN);
     }
 }
 class Level {
@@ -572,7 +573,7 @@ class Projectile extends MyObject {
     update() {
         var _a;
         this.x += this.speed * deltaTime * SCALE;
-        if (this.x < -SCALE || this.x > width + SCALE) {
+        if (this.x < -SCALE || this.x > width + SCALE || this.y < 0 || this.y >= UI.field.sizeY) {
             this.destroy();
         }
         let zombie;

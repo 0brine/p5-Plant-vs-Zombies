@@ -14,7 +14,7 @@ abstract class Projectile extends MyObject {
   update() {
     this.x += this.speed * deltaTime * SCALE;
 
-    if (this.x < -SCALE || this.x > width + SCALE) {
+    if (this.x < -SCALE || this.x > width + SCALE || this.y < 0 || this.y >= UI.field.sizeY) {
       this.destroy();
     }
 
